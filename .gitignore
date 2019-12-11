@@ -132,3 +132,4 @@ dmypy.json
 
 # virtual env
 /venv/
+/mydb.py

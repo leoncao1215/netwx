@@ -7,7 +7,7 @@ mongo = mydb.get_mongo(app)
 
 @app.route('/')
 def hello_world():
-    return '<br>http://ip-address/person/string:name</br><br>name=test</br>'
+    return '<br>http://ip-address/person/string:name</br><br>name=test</br><br>Like \'http://123.456/person/test\'</br>'
 
 
 @app.route('/person/<string:name>')

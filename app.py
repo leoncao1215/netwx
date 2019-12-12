@@ -7,11 +7,7 @@ mongo = mydb.get_mongo(app)
 
 @app.route('/')
 def hello_world():
-    persons = mongo.db.test.find({'name': 'test'})
-    print(persons)
-    for person in persons:
-        print(person)
-    return 'found'
+    return '<br>http://ip-address/person/string:name</br><br>name=test</br>'
 
 
 @app.route('/person/<string:name>')
@@ -19,7 +15,7 @@ def query_person(name):
     persons = mongo.db.test.find({'name': name})
     resp = ''.join([person['name'] for person in persons])
     print(resp)
-    return resp
+    return 'Person \'' + name + '\' ' + ('Found' if resp != '' else 'Not Found')
 
 
 if __name__ == '__main__':

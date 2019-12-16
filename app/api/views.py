@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from app.db import get_db
 api = Blueprint('api', __name__)
 
@@ -8,14 +8,19 @@ api = Blueprint('api', __name__)
 def get_wrong_questions():
     dismissed = request.args.get('dismissed', default=False, type=bool)
     category  = request.args.get('category',  default=None,  type=str)
+    uid = 123
 
-    print(dismissed, category)
-
-    # Demo db connection
     db = get_db()
-    persons = db.test.find({'name': 'test'})
-    resp = ''.join([person['name'] for person in persons])
-    return resp
+    query = {"uid": uid, "dismissed": dismissed}
+    if category:
+        query['category'] = category
+    questions = db.question.find(query)
+
+    resp = {"questions": [{
+        'id'        : q['id'],
+        'question'  : q['question']
+    } for q in questions]}
+    return jsonify(resp)
 
 
 @api.route('/wqs', methods=['POST', 'PUT'])

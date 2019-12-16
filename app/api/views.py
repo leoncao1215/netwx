@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
+from flask_login import login_required
 from app.db import get_db
 api = Blueprint('api', __name__)
 

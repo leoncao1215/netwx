@@ -29,6 +29,12 @@ def create_app(test_config=None):
     from .api import api_blueprint
     app.register_blueprint(api_blueprint, url_prefix='/api')
 
+    from .auth import auth_blueprint
+    app.register_blueprint(auth_blueprint, url_prefix='/login')
+
+    from .user import user_blueprint
+    app.register_blueprint(user_blueprint, url_prefix='/user')
+
     # a simple page that says hello
     @app.route('/hello')
     def hello():

@@ -14,4 +14,5 @@ def get_user_info():
           % (appid, secret, code)
     r = requests.get(url)
     result = r.text
+    print(result)
     return result

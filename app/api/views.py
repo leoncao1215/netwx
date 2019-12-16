@@ -48,7 +48,7 @@ def get_contests():
     pass
 
 
-@api.route('/contests/<int:contest_id', methods=['GET'])
+@api.route('/contests/<int:contest_id>', methods=['GET'])
 def get_contests(contest_id: int):
     pass
 

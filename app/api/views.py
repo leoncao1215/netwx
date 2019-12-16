@@ -38,18 +38,8 @@ def get_categories():
     pass
 
 
-@api.route('/contests/generate', methods=['GET'])
-def generate_contest():
-    pass
-
-
 @api.route('/contests', methods=['GET'])
 def get_contests():
-    pass
-
-
-@api.route('/contests/<int:contest_id>', methods=['GET'])
-def get_contests(contest_id: int):
     pass
 
 
@@ -58,6 +48,12 @@ def upload_contest_result():
     pass
 
 
+@api.route('/contests/<int:contest_id>', methods=['GET'])
+def get_contest_by_id(contest_id: int):
+    pass
 
 
+@api.route('/contests/generate', methods=['GET'])
+def generate_contest():
+    pass
 

@@ -148,7 +148,9 @@ def get_all_quizzes():
 @login_required
 def upload_quiz_result():
     uid = current_user.get_id()
-    pass
+    db = get_db()
+
+    return jsonify()
 
 
 @api.route('/quiz/<string:quiz_id>', methods=['GET'])
@@ -162,11 +164,12 @@ def get_quiz_by_id(quiz_id: str):
         abort(404)
     from app.api.utils import get_quiz
     return jsonify(get_quiz(quiz))
-    pass
 
 
-@api.route('/quiz/generate', methods=['GET'])
+@api.route('/quiz/generate/<int:question_num>/<string:category>', methods=['GET'])
 @login_required
-def generate_quiz():
+def generate_quiz(question_num, category):
     uid = current_user.get_id()
-    pass
+    db = get_db()
+    query = {"uid": uid, "category": category}
+    questions = db.question.find(query)

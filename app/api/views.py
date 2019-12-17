@@ -35,12 +35,19 @@ def get_wrong_questions():
 @login_required
 def update_wrong_questions():
     uid = current_user.get_id()
+    question_attrs = ['description', 'answer', 'dismissed', 'category', 'date']
+    question = {'uid': uid}
+    for attr_name in question_attrs:
+        question[attr_name] = request.json.get(attr_name)
+    print(question)
+    db = get_db()
     if request.method == 'POST':
         # 上传错题
-        pass
+        db.question.insert(question)
     else:
         # 更新错题
         pass
+    return 'update_wrong_questions'
 
 
 @api.route('/wqs/<string:wq_id>', methods=['DELETE'])

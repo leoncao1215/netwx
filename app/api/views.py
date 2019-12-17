@@ -104,7 +104,6 @@ def update_wrong_questions():
             return jsonify(resp)
 
 
-
 @api.route('/wqs/<string:wq_id>', methods=['DELETE'])
 @login_required
 def delete_wrong_question(wq_id: str):
@@ -144,9 +143,9 @@ def get_all_quizzes():
     return jsonify(resp)
 
 
-@api.route('/quiz/<bool:is_corrected', methods=['POST'])
+@api.route('/quiz/<int:is_corrected>', methods=['POST'])
 @login_required
-def upload_quiz_result(is_corrected: bool):
+def upload_quiz_result(is_corrected: int):
     uid = current_user.get_id()
     db = get_db()
     data = request.get_json()
@@ -165,7 +164,7 @@ def upload_quiz_result(is_corrected: bool):
     for i in range(len(question_list)):
         quiz['question_list'][i] = {'qid': question_list[i],
                                     'answer': answer_list[i],
-                                    'score': -1 if is_corrected else correct_list[i]
+                                    'score': correct_list[i] if is_corrected else -1
                                     }
     result = db.quiz.insert_one(quiz)
     resp = dict()

@@ -1,5 +1,5 @@
-from flask import Blueprint, request, jsonify, session
-from flask_login import login_required
+from flask import Blueprint, request, jsonify
+from flask_login import login_required, current_user
 from app.db import get_db
 api = Blueprint('api', __name__)
 
@@ -10,8 +10,7 @@ api = Blueprint('api', __name__)
 def get_wrong_questions():
     dismissed = request.args.get('dismissed', default=False, type=bool)
     category  = request.args.get('category',  default=None,  type=str)
-    uid = '123a'
-
+    uid = current_user.get_id()
     db = get_db()
     query = {"uid": uid, "dismissed": dismissed}
     if category:

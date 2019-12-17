@@ -50,30 +50,30 @@ def get_categories():
     pass
 
 
-@api.route('/contests', methods=['GET'])
+@api.route('/quiz', methods=['GET'])
 @login_required
-def get_contests():
+def get_all_quizzes():
     uid = current_user.get_id()
     pass
 
 
-@api.route('/contests', methods=['POST'])
+@api.route('/quiz', methods=['POST'])
 @login_required
-def upload_contest_result():
+def upload_quiz_result():
     uid = current_user.get_id()
     pass
 
 
-@api.route('/contests/<int:contest_id>', methods=['GET'])
+@api.route('/quiz/<int:contest_id>', methods=['GET'])
 @login_required
-def get_contest_by_id(contest_id: int):
+def get_quiz_by_id(contest_id: int):
     uid = current_user.get_id()
     pass
 
 
-@api.route('/contests/generate', methods=['GET'])
+@api.route('/quiz/generate', methods=['GET'])
 @login_required
-def generate_contest():
+def generate_quiz():
     uid = current_user.get_id()
     pass
 

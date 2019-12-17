@@ -4,7 +4,7 @@ def get_quiz(raw_quiz):
     db = get_db()
     questions = raw_quiz['question_list']
     quiz = {
-        'id': raw_quiz['id'],
+        '_id': str(raw_quiz['_id']),
         'date': raw_quiz['date'].time,
         'question_list': [],
         'total_num': len(questions),

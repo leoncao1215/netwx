@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, abort
 from flask_login import login_required, current_user
+from bson.objectid import ObjectId
 from app.db import get_db
 
 api = Blueprint('api', __name__)
@@ -48,10 +49,11 @@ def update_wrong_questions():
 def delete_wrong_question(wq_id: str):
     uid = current_user.get_id()
     db = get_db()
-    q = db.question.find_one({'id': wq_id})
+    wq_id = ObjectId(wq_id)
+    q = db.question.find_one({'_id': wq_id})
     if not q:
         abort(404)
-    db.question.delete_one({'id': wq_id})
+    db.question.delete_one({'_id': wq_id})
     return jsonify({'status': 'Success'})
 
 
@@ -92,7 +94,8 @@ def upload_quiz_result():
 def get_quiz_by_id(quiz_id: str):
     uid = current_user.get_id()
     db = get_db()
-    quiz = db.quiz.find_one({'id': quiz_id})
+    quiz_id = ObjectId(quiz_id)
+    quiz = db.quiz.find_one({'_id': quiz_id})
     if not quiz:
         abort(404)
     from app.api.utils import get_quiz

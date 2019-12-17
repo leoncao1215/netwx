@@ -22,7 +22,7 @@ def get_wrong_questions():
     resp = {
         "questions": [
             {
-                'id': q['id'],
+                '_id': str(q['_id']),
                 'description': q['description'],
                 'answer': q['answer'],
                 'date': q['date'].time

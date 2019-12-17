@@ -162,10 +162,10 @@ def upload_quiz_result(is_corrected: int):
     quiz['time_used'] = time_used
     quiz['question_list'] = []
     for i in range(len(question_list)):
-        quiz['question_list'][i] = {'qid': question_list[i],
+        quiz['question_list'].append({'qid': question_list[i],
                                     'answer': answer_list[i],
                                     'score': correct_list[i] if is_corrected else -1
-                                    }
+                                    })
     result = db.quiz.insert_one(quiz)
     resp = dict()
     resp['_id'] = str(result.inserted_id)

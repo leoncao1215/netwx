@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, abort
 from flask_login import login_required, current_user
 from bson.objectid import ObjectId
 from app.db import get_db
+from gridfs import GridFS
 
 api = Blueprint('api', __name__)
 
@@ -19,6 +20,9 @@ def get_wrong_questions():
         query['category'] = category
     questions = db.question.find(query)
 
+    gfs = GridFS(db, collection = 'question')
+    pic_results = gfs.find(query)
+
     resp = {
         "questions": [
             {
@@ -27,26 +31,41 @@ def get_wrong_questions():
                 'answer': q['answer'],
                 'date': q['date'].time
             } for q in questions
+        ],
+        "pictures": [
+            {
+                'uid': str(grid_out.uid),
+                'data': str(grid_out.read()),
+                'answer': str(grid_out.answer),
+                'dismissed': str(grid_out.dismissed),
+                'category': str(grid_out.category),
+                'date': str(grid_out.uploadDate),
+                'pic_name': str(grid_out.filename),
+                'content_type': str(grid_out.content_type)
+            } for grid_out in pic_results
         ]
     }
     return jsonify(resp)
 
 
-@api.route('/wqs', methods=['POST', 'PUT'])
+
+
+@api.route('/wqs', methods=['GET', 'POST', 'PUT'])
 @login_required
 def update_wrong_questions():
-    from bson import ObjectId, timestamp
+    from bson import timestamp
+
     uid = current_user.get_id()
     db = get_db()
     resp = {}
 
     f = request.files['file']
-    if f:  # upload picture question
+    if f:  # upload picture question by form
         ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg'])  # 允许上传的文件类型
         def allowed_file(filename):  # 验证上传的文件名是否符合要求，文件名必须带点并且符合允许上传的文件类型要求，两者都满足则返回 true
             return '.' in filename and \
                    filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-        from gridfs import GridFS
+
 
         fname = f.filename
         if allowed_file(fname):
@@ -74,7 +93,7 @@ def update_wrong_questions():
                                 uid = uid, answer = answer, dismissed = dismissed, category = category)
             resp['_id'] = str(insertimg)
             return jsonify(resp)
-    else: # upload text question
+    else: # upload text question by json
         def load_request_attr(question, request):
             question_attrs = ['description', 'answer', 'dismissed', 'category', 'date']
             for attr_name in question_attrs:
@@ -173,3 +192,4 @@ def generate_quiz(question_num, category):
     db = get_db()
     query = {"uid": uid, "category": category}
     questions = db.question.find(query)
+

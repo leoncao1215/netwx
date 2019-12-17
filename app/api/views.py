@@ -104,13 +104,33 @@ def get_all_quizzes():
     return jsonify(resp)
 
 
-@api.route('/quiz', methods=['POST'])
+@api.route('/quiz/<bool:is_corrected', methods=['POST'])
 @login_required
-def upload_quiz_result():
+def upload_quiz_result(is_corrected: bool):
     uid = current_user.get_id()
     db = get_db()
-
-    return jsonify()
+    data = request.get_json()
+    question_list = data.get('question_arr')
+    answer_list = data.get('answer_arr')
+    correct_list = data.get('correct_arr')
+    from bson import timestamp
+    date = data.get('date')
+    date = timestamp.Timestamp(date, 1)
+    time_used = data.get('time_used')
+    quiz = dict()
+    quiz['uid'] = uid
+    quiz['date'] = date
+    quiz['time_used'] = time_used
+    quiz['question_list'] = []
+    for i in range(len(question_list)):
+        quiz['question_list'][i] = {'qid': question_list[i],
+                                    'answer': answer_list[i],
+                                    'score': -1 if is_corrected else correct_list[i]
+                                    }
+    result = db.quiz.insert_one(quiz)
+    resp = dict()
+    resp['_id'] = str(result.inserted_id)
+    return jsonify(resp)
 
 
 @api.route('/quiz/<string:quiz_id>', methods=['GET'])
@@ -128,7 +148,7 @@ def get_quiz_by_id(quiz_id: str):
 
 @api.route('/quiz/generate/<int:question_num>/<string:category>', methods=['GET'])
 @login_required
-def generate_quiz(question_num, category):
+def generate_quiz(question_num: int, category: str):
     uid = current_user.get_id()
     db = get_db()
     query = {"uid": uid, "category": category}

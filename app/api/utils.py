@@ -1,5 +1,6 @@
 from app.db import get_db
 
+
 def get_quiz(raw_quiz):
     db = get_db()
     questions = raw_quiz['question_list']
@@ -9,7 +10,7 @@ def get_quiz(raw_quiz):
         'question_list': [],
         'total_num': len(questions),
         'correct_num': len([q['score'] for q in questions if q['score'] == 1]),
-        'timing': sum([q['timing'] for q in questions]),
+        'time_used': raw_quiz['time_used'],
         'scored': len([q['score'] for q in questions if q['score'] == -1]) == 0
     }
     for q in questions:
@@ -17,8 +18,7 @@ def get_quiz(raw_quiz):
             'qid': q['qid'],
             'description': db.question.find_one({'id': q['qid']}).get('description'),
             'answer': q['answer'],
-            'scored': q['score'] != -1,
-            'timing': q['timing']
+            'scored': q['score'] != -1
         }
         if q['score'] == 1:
             tmp_qes['is_correct'] = True

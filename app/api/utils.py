@@ -15,7 +15,7 @@ def get_quiz(raw_quiz):
     for q in questions:
         tmp_qes = {
             'qid': q['qid'],
-            'description': db.question.find_one({'id': q['qid']}).get('question'),
+            'description': db.question.find_one({'id': q['qid']}).get('description'),
             'answer': q['answer'],
             'scored': q['score'] != -1,
             'timing': q['timing']

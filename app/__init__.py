@@ -26,11 +26,14 @@ def create_app(test_config=None):
     from config import DevelopmentConfig
     app.config.from_object(DevelopmentConfig())
 
+    from .auth import init_app as auth_init_app
+    auth_init_app(app)
+
     from .api import api_blueprint
     app.register_blueprint(api_blueprint, url_prefix='/api')
 
     from .auth import auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/login')
+    app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
     from .user import user_blueprint
     app.register_blueprint(user_blueprint, url_prefix='/user')

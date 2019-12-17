@@ -1,14 +1,16 @@
 from flask import Blueprint, request, jsonify, session
+from flask_login import login_required
 from app.db import get_db
 api = Blueprint('api', __name__)
 
 
 # 获取错题列表, 默认不包括不重要的
 @api.route('/wqs', methods=['GET'])
+@login_required
 def get_wrong_questions():
     dismissed = request.args.get('dismissed', default=False, type=bool)
     category  = request.args.get('category',  default=None,  type=str)
-    uid = 123
+    uid = '123a'
 
     db = get_db()
     query = {"uid": uid, "dismissed": dismissed}

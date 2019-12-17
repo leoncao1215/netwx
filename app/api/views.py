@@ -14,13 +14,17 @@ def get_wrong_questions():
     dismissed = request.args.get('dismissed', default=False, type=bool)
     category = request.args.get('category', default=None, type=str)
     uid = current_user.get_id()
-    db = get_db()
     query = {"uid": uid, "dismissed": dismissed}
     if category:
         query['category'] = category
+    return jsonify(get_all_question(query))
+
+
+def get_all_question(query):
+    db = get_db()
     questions = db.question.find(query)
 
-    gfs = GridFS(db, collection = 'question')
+    gfs = GridFS(db, collection='question')
     pic_results = gfs.find(query)
 
     resp = {
@@ -45,9 +49,7 @@ def get_wrong_questions():
             } for grid_out in pic_results
         ]
     }
-    return jsonify(resp)
-
-
+    return resp
 
 
 @api.route('/wqs', methods=['GET', 'POST', 'PUT'])
@@ -65,7 +67,6 @@ def update_wrong_questions():
         def allowed_file(filename):  # 验证上传的文件名是否符合要求，文件名必须带点并且符合允许上传的文件类型要求，两者都满足则返回 true
             return '.' in filename and \
                    filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
 
         fname = f.filename
         if allowed_file(fname):
@@ -210,5 +211,4 @@ def generate_quiz(question_num: int, category: str):
     uid = current_user.get_id()
     db = get_db()
     query = {"uid": uid, "category": category}
-    questions = db.question.find(query)
-
+    questions = get_all_question(query)

@@ -34,20 +34,34 @@ def get_wrong_questions():
 @api.route('/wqs', methods=['POST', 'PUT'])
 @login_required
 def update_wrong_questions():
+    from bson import ObjectId, timestamp
     uid = current_user.get_id()
     question_attrs = ['description', 'answer', 'dismissed', 'category', 'date']
-    question = {'uid': uid}
-    for attr_name in question_attrs:
-        question[attr_name] = request.json.get(attr_name)
-    print(question)
     db = get_db()
+    resp = {}
     if request.method == 'POST':
         # 上传错题
-        db.question.insert(question)
-    else:
+        question = {'uid': uid}
+        for attr_name in question_attrs:
+            attr = request.json.get(attr_name)
+            if attr_name == 'date':
+                attr = timestamp.Timestamp(attr, 1)
+            question[attr_name] = attr
+        result = db.question.insert_one(question)
+        resp['_id'] = str(result.inserted_id)
+        return jsonify(resp)
+    elif request.method == 'PUT':
         # 更新错题
-        pass
-    return 'update_wrong_questions'
+        _id = request.json.get('_id')
+        obj_id = ObjectId(_id)
+        condition = {'uid':uid, '_id':obj_id}
+        ori_question = db.question.find_one(condition)
+        for attr_name in question_attrs:
+            ori_question[attr_name] = request.json.get(attr_name)
+        result = db.question.update_one(condition, {'$set': ori_question})
+        resp['matched_count'] = result.matched_count
+        resp['modified_count'] = result.modified_count
+        return jsonify(resp)
 
 
 @api.route('/wqs/<string:wq_id>', methods=['DELETE'])

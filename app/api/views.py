@@ -54,7 +54,11 @@ def delete_wrong_question(wq_id: int):
 @login_required
 def get_categories():
     uid = current_user.get_id()
-    pass
+    db = get_db()
+    res = db.question.find({'uid': uid})
+    categories = set([_['category'] for _ in res])
+    resp = {'categories': list(categories)}
+    return jsonify(resp)
 
 
 @api.route('/quiz', methods=['GET'])

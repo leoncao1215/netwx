@@ -45,7 +45,7 @@ def update_wrong_questions():
 
 @api.route('/wqs/<string:wq_id>', methods=['DELETE'])
 @login_required
-def delete_wrong_question(wq_id: int):
+def delete_wrong_question(wq_id: str):
     uid = current_user.get_id()
     db = get_db()
     q = db.question.find_one({'id': wq_id})
@@ -75,32 +75,8 @@ def get_all_quizzes():
     resp = {'quizzes': []}
 
     for quiz in quizzes:
-        questions = quiz['question_list']
-        print(type(quiz['date']))
-        tmp = {
-            'id': quiz['id'],
-            'date': quiz['date'].time,
-            'question_list': [],
-            'total_num': len(questions),
-            'correct_num': len([q['score'] for q in questions if q['score'] == 1]),
-            'timing': sum([q['timing'] for q in questions]),
-            'scored': len([q['score'] for q in questions if q['score'] == -1]) == 0
-        }
-        for q in questions:
-            tmp_qes = {
-                'qid': q['qid'],
-                'description': db.question.find_one({'id': q['qid']}).get('question'),
-                'answer': q['answer'],
-                'scored': q['score'] != -1,
-                'timing': q['timing']
-            }
-            if q['score'] == 1:
-                tmp_qes['is_correct'] = True
-            elif q['score'] == 0:
-                tmp_qes['is_correct'] = False
-            tmp['question_list'].append(tmp_qes)
-
-        resp['quizzes'].append(tmp)
+        from app.api.utils import get_quiz
+        resp['quizzes'].append(get_quiz(quiz))
     return jsonify(resp)
 
 
@@ -111,10 +87,16 @@ def upload_quiz_result():
     pass
 
 
-@api.route('/quiz/<int:contest_id>', methods=['GET'])
+@api.route('/quiz/<string:quiz_id>', methods=['GET'])
 @login_required
-def get_quiz_by_id(contest_id: int):
+def get_quiz_by_id(quiz_id: str):
     uid = current_user.get_id()
+    db = get_db()
+    quiz = db.quiz.find_one({'id': quiz_id})
+    if not quiz:
+        abort(404)
+    from app.api.utils import get_quiz
+    return jsonify(get_quiz(quiz))
     pass
 
 

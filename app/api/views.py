@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, abort
 from flask_login import login_required, current_user
 from app.db import get_db
 
@@ -43,11 +43,16 @@ def update_wrong_questions():
         pass
 
 
-@api.route('/wqs/<int:wq_id>', methods=['DELETE'])
+@api.route('/wqs/<string:wq_id>', methods=['DELETE'])
 @login_required
 def delete_wrong_question(wq_id: int):
     uid = current_user.get_id()
-    pass
+    db = get_db()
+    q = db.question.find_one({'id': wq_id})
+    if not q:
+        abort(404)
+    db.question.delete_one({'id': wq_id})
+    return jsonify({'status': 'Success'})
 
 
 @api.route('/wqs/categories', methods=['GET'])

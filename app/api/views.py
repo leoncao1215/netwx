@@ -25,7 +25,9 @@ def get_wrong_questions():
 
 
 @api.route('/wqs', methods=['POST', 'PUT'])
+@login_required
 def update_wrong_questions():
+    uid = current_user.get_id()
     if request.method == 'POST':
         # 上传错题
         pass
@@ -35,31 +37,43 @@ def update_wrong_questions():
 
 
 @api.route('/wqs/<int:wq_id>', methods=['DELETE'])
+@login_required
 def delete_wrong_question(wq_id: int):
+    uid = current_user.get_id()
     pass
 
 
 @api.route('/wqs/categories', methods=['GET'])
+@login_required
 def get_categories():
+    uid = current_user.get_id()
     pass
 
 
 @api.route('/contests', methods=['GET'])
+@login_required
 def get_contests():
+    uid = current_user.get_id()
     pass
 
 
 @api.route('/contests', methods=['POST'])
+@login_required
 def upload_contest_result():
+    uid = current_user.get_id()
     pass
 
 
 @api.route('/contests/<int:contest_id>', methods=['GET'])
+@login_required
 def get_contest_by_id(contest_id: int):
+    uid = current_user.get_id()
     pass
 
 
 @api.route('/contests/generate', methods=['GET'])
+@login_required
 def generate_contest():
+    uid = current_user.get_id()
     pass
 

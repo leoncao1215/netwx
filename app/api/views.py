@@ -171,12 +171,13 @@ def get_all_quizzes():
     return jsonify(resp)
 
 
-@api.route('/quiz/<int:is_corrected>', methods=['POST'])
+@api.route('/quiz', methods=['POST'])
 @login_required
-def upload_quiz_result(is_corrected: int):
+def upload_quiz_result():
     uid = current_user.get_id()
     db = get_db()
     data = request.get_json()
+    is_corrected = data.get('is_corrected')
     question_list = data.get('question_arr')
     answer_list = data.get('answer_arr')
     correct_list = data.get('correct_arr')

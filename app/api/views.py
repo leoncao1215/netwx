@@ -60,15 +60,12 @@ def get_all_question_dict(query):
     return transfer_question_dict(questions, pic_results)
 
 
-@api.route('/wqs', methods=['GET', 'POST', 'PUT'])
+@api.route('/wqs_file', methods=['POST', 'PUT'])
 @login_required
-def update_wrong_questions():
-    from bson import timestamp
-
+def update_wrong_questions_file():
     uid = current_user.get_id()
     db = get_db()
     resp = {}
-
     f = request.files['file']
     if f:  # upload picture question by form
         ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg'])  # 允许上传的文件类型
@@ -102,34 +99,45 @@ def update_wrong_questions():
                                 uid = uid, answer = answer, dismissed = dismissed, category = category)
             resp['_id'] = str(insertimg)
             return jsonify(resp)
-    else: # upload text question by json
-        def load_request_attr(question, request):
-            question_attrs = ['description', 'answer', 'dismissed', 'category', 'date']
-            for attr_name in question_attrs:
-                attr = request.json.get(attr_name)
-                if attr_name == 'date':
-                    attr = timestamp.Timestamp(attr, 1)
-                question[attr_name] = attr
 
-        if request.method == 'POST':
-            # 上传错题
-            question = {'uid': uid}
-            load_request_attr(question, request)
-            result = db.question.insert_one(question)
-            resp['_id'] = str(result.inserted_id)
-            return jsonify(resp)
+    return jsonify({'status':'Failed', 'message':'file error'})
 
-        elif request.method == 'PUT':
-            # 更新错题
-            _id = request.json.get('_id')
-            obj_id = ObjectId(_id)
-            condition = {'uid':uid, '_id':obj_id}
-            ori_question = db.question.find_one(condition)
-            load_request_attr(ori_question, request)
-            result = db.question.update_one(condition, {'$set': ori_question})
-            resp['matched_count'] = result.matched_count
-            resp['modified_count'] = result.modified_count
-            return jsonify(resp)
+@api.route('/wqs', methods=['POST', 'PUT'])
+@login_required
+def update_wrong_questions():
+    from bson import timestamp
+    uid = current_user.get_id()
+    db = get_db()
+    resp = {}
+    # upload text question by json
+    def load_request_attr(question, request):
+        question_attrs = ['description', 'answer', 'dismissed', 'category', 'date']
+        for attr_name in question_attrs:
+            attr = request.json.get(attr_name)
+            if attr_name == 'date':
+                attr = timestamp.Timestamp(attr, 1)
+            question[attr_name] = attr
+
+    if request.method == 'POST':
+        # 上传错题
+        question = {'uid': uid}
+        load_request_attr(question, request)
+        result = db.question.insert_one(question)
+        resp['_id'] = str(result.inserted_id)
+        return jsonify(resp)
+
+    elif request.method == 'PUT':
+        # 更新错题
+        _id = request.json.get('_id')
+        obj_id = ObjectId(_id)
+        condition = {'uid':uid, '_id':obj_id}
+        ori_question = db.question.find_one(condition)
+        load_request_attr(ori_question, request)
+        result = db.question.update_one(condition, {'$set': ori_question})
+        # print(result.raw_result)
+        resp['matched_count'] = result.matched_count
+        resp['modified_count'] = result.modified_count
+        return jsonify(resp)
 
 
 @api.route('/wqs/<string:wq_id>', methods=['DELETE'])

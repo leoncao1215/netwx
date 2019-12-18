@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from bson.objectid import ObjectId
 from app.db import get_db
 from gridfs import GridFS
+import random
 
 api = Blueprint('api', __name__)
 
@@ -14,15 +15,21 @@ def get_wrong_questions():
     dismissed = request.args.get('dismissed', default=False, type=bool)
     category = request.args.get('category', default=None, type=str)
     uid = current_user.get_id()
-    db = get_db()
     query = {"uid": uid, "dismissed": dismissed}
     if category:
         query['category'] = category
+    return jsonify(get_all_question_dict(query))
+
+
+def get_all_question(query):
+    db = get_db()
     questions = db.question.find(query)
-
-    gfs = GridFS(db, collection = 'question')
+    gfs = GridFS(db, collection='question')
     pic_results = gfs.find(query)
+    return questions, pic_results
 
+
+def transfer_question_dict(questions, pic_results):
     resp = {
         "questions": [
             {
@@ -45,10 +52,15 @@ def get_wrong_questions():
             } for grid_out in pic_results
         ]
     }
-    return jsonify(resp)
+    return resp
 
 
-@api.route('/wqs', methods=['GET', 'POST', 'PUT'])
+def get_all_question_dict(query):
+    questions, pic_results = get_all_question(query)
+    return transfer_question_dict(questions, pic_results)
+
+
+@api.route('/wqs', methods=['POST', 'PUT'])
 @login_required
 def update_wrong_questions():
     from bson import timestamp
@@ -63,7 +75,6 @@ def update_wrong_questions():
         def allowed_file(filename):  # 验证上传的文件名是否符合要求，文件名必须带点并且符合允许上传的文件类型要求，两者都满足则返回 true
             return '.' in filename and \
                    filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
 
         fname = f.filename
         if allowed_file(fname):
@@ -179,10 +190,10 @@ def upload_quiz_result(is_corrected: int):
     quiz['time_used'] = time_used
     quiz['question_list'] = []
     for i in range(len(question_list)):
-        quiz['question_list'][i] = {'qid': question_list[i],
+        quiz['question_list'].append({'qid': question_list[i],
                                     'answer': answer_list[i],
                                     'score': correct_list[i] if is_corrected else -1
-                                    }
+                                    })
     result = db.quiz.insert_one(quiz)
     resp = dict()
     resp['_id'] = str(result.inserted_id)
@@ -206,7 +217,11 @@ def get_quiz_by_id(quiz_id: str):
 @login_required
 def generate_quiz(question_num: int, category: str):
     uid = current_user.get_id()
-    db = get_db()
     query = {"uid": uid, "category": category}
-    questions = db.question.find(query)
-
+    questions, pictures = get_all_question(query)
+    num_p = int(random.random() * pictures.count())
+    num_q = question_num - num_p
+    questions = random.sample(list(questions), num_q)
+    pictures = random.sample(list(pictures), num_p)
+    resp = transfer_question_dict(questions, pictures)
+    return jsonify(resp)

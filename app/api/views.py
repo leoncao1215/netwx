@@ -48,8 +48,6 @@ def get_wrong_questions():
     return jsonify(resp)
 
 
-
-
 @api.route('/wqs', methods=['GET', 'POST', 'PUT'])
 @login_required
 def update_wrong_questions():

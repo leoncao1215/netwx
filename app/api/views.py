@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from bson.objectid import ObjectId
 from app.db import get_db
 from gridfs import GridFS
+import random
 
 api = Blueprint('api', __name__)
 
@@ -17,16 +18,18 @@ def get_wrong_questions():
     query = {"uid": uid, "dismissed": dismissed}
     if category:
         query['category'] = category
-    return jsonify(get_all_question(query))
+    return jsonify(get_all_question_dict(query))
 
 
 def get_all_question(query):
     db = get_db()
     questions = db.question.find(query)
-
     gfs = GridFS(db, collection='question')
     pic_results = gfs.find(query)
+    return questions, pic_results
 
+
+def transfer_question_dict(questions, pic_results):
     resp = {
         "questions": [
             {
@@ -50,6 +53,11 @@ def get_all_question(query):
         ]
     }
     return resp
+
+
+def get_all_question_dict(query):
+    questions, pic_results = get_all_question(query)
+    return transfer_question_dict(questions, pic_results)
 
 
 @api.route('/wqs', methods=['GET', 'POST', 'PUT'])
@@ -210,4 +218,10 @@ def get_quiz_by_id(quiz_id: str):
 def generate_quiz(question_num: int, category: str):
     uid = current_user.get_id()
     query = {"uid": uid, "category": category}
-    questions = get_all_question(query)
+    questions, pictures = get_all_question(query)
+    num_p = int(random.random() * pictures.count())
+    num_q = question_num - num_p
+    questions = random.sample(list(questions), num_q)
+    pictures = random.sample(list(pictures), num_p)
+    resp = transfer_question_dict(questions, pictures)
+    return jsonify(resp)

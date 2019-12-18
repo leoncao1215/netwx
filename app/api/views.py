@@ -209,6 +209,5 @@ def get_quiz_by_id(quiz_id: str):
 @login_required
 def generate_quiz(question_num: int, category: str):
     uid = current_user.get_id()
-    db = get_db()
     query = {"uid": uid, "category": category}
     questions = get_all_question(query)

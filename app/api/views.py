@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from bson.objectid import ObjectId
 from app.db import get_db
 from gridfs import GridFS
+from bson import timestamp
 import random
 
 api = Blueprint('api', __name__)
@@ -21,44 +22,34 @@ def get_wrong_questions():
     return jsonify(get_all_question_dict(query))
 
 
+def get_all_question_dict(query):
+    questions = get_all_question(query)
+    return transfer_question_dict(questions)
+
+
 def get_all_question(query):
     db = get_db()
     questions = db.question.find(query)
-    gfs = GridFS(db, collection='question')
-    pic_results = gfs.find(query)
-    return questions, pic_results
+    # gfs = GridFS(db, collection='question')
+    # pic_results = gfs.find(query)
+    return questions
 
 
-def transfer_question_dict(questions, pic_results):
+def transfer_question_dict(questions):
     resp = {
         "questions": [
             {
                 '_id': str(q['_id']),
-                'description': q['description'],
+                'description': q['description'] if 'description' in q else '',
+                'category': q['category'],
+                'dismissed': q['dismissed'],
                 'answer': q['answer'],
-                'date': q['date'].time
+                'date': q['date'].time,
+                'url': q['url'] if 'url' in q else None
             } for q in questions
-        ],
-        "pictures": [
-            {
-                'uid': str(grid_out.uid),
-                'data': str(grid_out.read()),
-                'answer': str(grid_out.answer),
-                'dismissed': str(grid_out.dismissed),
-                'category': str(grid_out.category),
-                'date': str(grid_out.uploadDate),
-                'pic_name': str(grid_out.filename),
-                'content_type': str(grid_out.content_type)
-            } for grid_out in pic_results
-        ]
+        ] 
     }
     return resp
-
-
-def get_all_question_dict(query):
-    questions, pic_results = get_all_question(query)
-    return transfer_question_dict(questions, pic_results)
-
 
 
 @api.route('/wqs_file', methods=['POST', 'PUT'])
@@ -67,7 +58,15 @@ def update_wrong_questions_file():
     uid = current_user.get_id()
     db = get_db()
     resp = {}
+
     f = request.files['file']
+    question = {'uid': uid}
+    question['description'] = request.form.get('description')
+    question['date'] = timestamp.Timestamp(request.form.get('date'), 1)
+    question['fname'] = f.filename
+    question['dismissed'] = (False, True)[request.form.get('dismissed').lower() == 'true']
+    question['category'] = request.form.get('category')
+    question['answer'] = request.form.get('answer')
 
     import requests
 
@@ -78,46 +77,53 @@ def update_wrong_questions_file():
         print(data_result.json())
         return data_result.json()
 
-    data_result = upload_to_smms(f)
-    # if f:  # upload picture question by form
-    #     ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg'])  # 允许上传的文件类型
-    #     def allowed_file(filename):  # 验证上传的文件名是否符合要求，文件名必须带点并且符合允许上传的文件类型要求，两者都满足则返回 true
-    #         return '.' in filename and \
-    #                filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-    #
-    #     fname = f.filename
-    #     if allowed_file(fname):
-    #         gfs = GridFS(db, collection = 'question')
-    #         fparts = fname.split('.')
-    #         fdesc = fparts[0] # file name
-    #         ftype = fparts[1] # file extend name
-    #
-    #         answer = request.form.get('answer')
-    #         dismissed = (False, True)[request.form.get('dismissed').lower() == 'true']
-    #         category = request.form.get('category')
-    #         if request.method == 'PUT': # delete original picture
-    #             _id = request.form.get('_id')
-    #             obj_id = ObjectId(_id)
-    #             condition = {'uid': uid, '_id': obj_id}
-    #             result = gfs.find_one(condition)  # check uid
-    #             if not result:
-    #                 resp['status'] = 'Failed'
-    #                 resp['message'] = '_id not found'
-    #                 return jsonify(resp)
-    #             else:
-    #                 gfs.delete(obj_id)
-    #
-    #         insertimg = gfs.put(f, content_type = ftype, filename = fdesc,
-    #                             uid = uid, answer = answer, dismissed = dismissed, category = category)
-    #         resp['_id'] = str(insertimg)
-    #         return jsonify(resp)
+    if request.method == 'PUT':
+        _id = request.form.get('_id')
+        condition = {'uid': uid, '_id': ObjectId(_id)}
+        ori_question = db.question.find_one(condition)
+        if not ori_question:
+            resp['success'] = False
+            resp['message'] = '_id not found'
+            return jsonify(resp)
+        else:
+            delete_url = ori_question['delete']
+            requests.get(delete_url)  # delete
 
-    return jsonify({'status':'Failed', 'message':'file error'})
+    # upload picture
+    data_result = upload_to_smms(f)
+    smms_result = data_result['success']
+    # smms_code = data_result['code']
+    smms_message = data_result['message']
+
+    resp['success'] = smms_result
+    resp['message'] = smms_message
+
+    if smms_result is True:
+        data = data_result['data']
+        # store data dictionary to MongoDB
+        # data_keys = ['width', 'height', 'size', 'path', 'hash', 'url', 'delete', 'page', 'RequestId']  # 'filename','storename','file_id',
+        del data['filename'], data['storename'], data['file_id']
+        question.update(data)
+        if request.method == 'PUT':
+            ori_question.update(data)
+            ori_question.update(question)
+            update_result = db.question.update_one(condition, {'$set': ori_question})
+            # print(result.raw_result)
+            resp['matched_count'] = update_result.matched_count
+            resp['modified_count'] = update_result.modified_count
+        elif request.method == 'POST':
+            result = db.question.insert_one(question)
+            resp['_id'] = str(result.inserted_id)
+        return jsonify(resp)
+    else:
+        # smms_images = data_result['images']
+        # smms_request_id = data_result['RequestId']
+        return jsonify(resp)
+
 
 @api.route('/wqs', methods=['POST', 'PUT'])
 @login_required
 def update_wrong_questions():
-    from bson import timestamp
     uid = current_user.get_id()
     db = get_db()
     resp = {}

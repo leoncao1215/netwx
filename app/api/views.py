@@ -245,10 +245,7 @@ def get_quiz_by_id(quiz_id: str):
 def generate_quiz(question_num: int, category: str):
     uid = current_user.get_id()
     query = {"uid": uid, "category": category}
-    questions, pictures = get_all_question(query)
-    num_p = int(random.random() * pictures.count())
-    num_q = question_num - num_p
-    questions = random.sample(list(questions), num_q)
-    pictures = random.sample(list(pictures), num_p)
-    resp = transfer_question_dict(questions, pictures)
+    questions = get_all_question(query)
+    questions = random.sample(list(questions), question_num)
+    resp = transfer_question_dict(questions)
     return jsonify(resp)

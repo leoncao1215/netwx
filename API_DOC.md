@@ -224,25 +224,36 @@ url: `GET /api/quiz`
 
 ```json
 {
-  'quizzes': [
-    {
-      '_id': ,
-      'date': , //上传的时间timestamp
-      'total_num': ,   //错题总数
-      'correct_num': ,  //正确的个数
-      'time_used': , //测试用时
-      'scored': , //是否批改，1批改，0未批改
-      'question_list': [
-      	{
-      		'qid': , //错题id
-      		'description': ,  //错题描述
-      		'answer': ,   //错题答案
-      		'scored': ,    //是否批改，1批改，0未批改
-      		'is_correct': True   //是否回答正确 true、false
-    		}
-  		]
-		}
-	]
+    "quizzes": [ //这是个数组
+        {
+            "_id": "5df8f85c335a9071b00f2083",//测试的_id
+            "correct_num": 1,//测试回答正确的个数
+            "date": 1576570746,//timestamp类型
+            "question_list": [
+                {
+                    "answer": "a",//用户的答案
+                    "description": "",//错题的描述
+                    "is_correct": true,//回答是否正确
+                    "qid": "5df79846a537b8ec7b542a02"//错题的_id
+                },
+                {
+                    "answer": "b",
+                    "description": "",
+                    "is_correct": false,
+                    "qid": "5df79122a537b8ec7b542a01"
+                },
+                {
+                    "answer": "c",
+                    "description": "des",
+                    "is_correct": false,
+                    "qid": "5df8c017ffa085968a71bb6b"
+                }
+            ],
+            "scored": true, //是否被批改
+            "time_used": 300, //用户完成测试的用时（秒）
+            "total_num": 3 //测试的错题的个数
+        }
+    ]
 }
 ```
 
@@ -311,49 +322,24 @@ category：错题类型
 返回：
 
 {
-
-questions:  //字典的列表
-
-[
-
-{
-
-_id:
-
-description
-
-answer
-
-date
-
-}
-
-]
-
-pictures: 
-
-[
-
-{
-
-uid
-
-data: 图片
-
-answer
-
-dismissed
-
-category
-
-date
-
-pic_name：不带拓展类型的文件名
-
-content_type：文件拓展类型
-
-}
-
-]
-
+    "questions": [
+        {
+            "_id": "5dfb8888a595b9affd35d6f3",
+            "answer": "answer123",
+            "category": "文学",
+            "date": 1576570617,
+            "description": "",
+            "dismissed": false,
+            "url": "https://i.loli.net/2019/12/19/mBGtQJCELXqzWae.jpg"  //如果不是图片，url是null
+        },
+        {
+            "_id": "5dfb836ea595b9affd35d6ef",
+            "answer": "answer123",
+            "category": "文学",
+            "date": 1576570617,
+            "description": "",
+            "dismissed": false,
+            "url": "https://i.loli.net/2019/12/19/Z8WCbJOQh4KpTqF.jpg"
+        }
+    ]
 }

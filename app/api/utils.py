@@ -18,8 +18,7 @@ def get_quiz(raw_quiz):
         tmp_qes = {
             'qid': q['qid'],
             'description': db.question.find_one({'_id': ObjectId(q['qid'])}).get('description'),
-            'answer': q['answer'],
-            'scored': q['score'] != -1
+            'answer': q['answer']
         }
         if q['score'] == 1:
             tmp_qes['is_correct'] = True

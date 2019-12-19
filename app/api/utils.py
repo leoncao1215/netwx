@@ -13,10 +13,11 @@ def get_quiz(raw_quiz):
         'time_used': raw_quiz['time_used'],
         'scored': len([q['score'] for q in questions if q['score'] == -1]) == 0
     }
+    from bson.objectid import ObjectId
     for q in questions:
         tmp_qes = {
             'qid': q['qid'],
-            'description': db.question.find_one({'id': q['qid']}).get('description'),
+            'description': db.question.find_one({'_id': ObjectId(q['qid'])}).get('description'),
             'answer': q['answer'],
             'scored': q['score'] != -1
         }

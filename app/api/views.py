@@ -70,19 +70,13 @@ def update_wrong_questions_file():
     f = request.files['file']
 
     import requests
+
     def upload_to_smms(f):
-        smms_host = 'https://sm.ms'
-        smms_url = smms_host + '/api/v2/upload'
+        smms_url = 'https://sm.ms/api/upload'
         file = {'smfile': f}
-        fname = f.filename
-        fparts = fname.split('.')
-        # fdesc = fparts[0]  # file name
-        ftype = fparts[1]  # file extend name
-        headers = {'Content-Type':ftype}
-        data_result = requests.post(smms_url, headers = headers, data = None, files = file)
-        print(type(data_result))
+        data_result=requests.post(smms_url,data=None,files=file)
         print(data_result.json())
-        return data_result
+        return data_result.json()
 
     data_result = upload_to_smms(f)
     # if f:  # upload picture question by form

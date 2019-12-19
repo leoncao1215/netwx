@@ -60,6 +60,7 @@ def get_all_question_dict(query):
     return transfer_question_dict(questions, pic_results)
 
 
+
 @api.route('/wqs_file', methods=['POST', 'PUT'])
 @login_required
 def update_wrong_questions_file():
@@ -67,38 +68,55 @@ def update_wrong_questions_file():
     db = get_db()
     resp = {}
     f = request.files['file']
-    if f:  # upload picture question by form
-        ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg'])  # 允许上传的文件类型
-        def allowed_file(filename):  # 验证上传的文件名是否符合要求，文件名必须带点并且符合允许上传的文件类型要求，两者都满足则返回 true
-            return '.' in filename and \
-                   filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+    import requests
+    def upload_to_smms(f):
+        smms_host = 'https://sm.ms'
+        smms_url = smms_host + '/api/v2/upload'
+        file = {'smfile': f}
         fname = f.filename
-        if allowed_file(fname):
-            gfs = GridFS(db, collection = 'question')
-            fparts = fname.split('.')
-            fdesc = fparts[0] # file name
-            ftype = fparts[1] # file extend name
+        fparts = fname.split('.')
+        # fdesc = fparts[0]  # file name
+        ftype = fparts[1]  # file extend name
+        headers = {'Content-Type':ftype}
+        data_result = requests.post(smms_url, headers = headers, data = None, files = file)
+        print(type(data_result))
+        print(data_result.json())
+        return data_result
 
-            answer = request.form.get('answer')
-            dismissed = (False, True)[request.form.get('dismissed').lower() == 'true']
-            category = request.form.get('category')
-            if request.method == 'PUT': # delete original picture
-                _id = request.form.get('_id')
-                obj_id = ObjectId(_id)
-                condition = {'uid': uid, '_id': obj_id}
-                result = gfs.find_one(condition)  # check uid
-                if not result:
-                    resp['status'] = 'Failed'
-                    resp['message'] = '_id not found'
-                    return jsonify(resp)
-                else:
-                    gfs.delete(obj_id)
-
-            insertimg = gfs.put(f, content_type = ftype, filename = fdesc,
-                                uid = uid, answer = answer, dismissed = dismissed, category = category)
-            resp['_id'] = str(insertimg)
-            return jsonify(resp)
+    data_result = upload_to_smms(f)
+    # if f:  # upload picture question by form
+    #     ALLOWED_EXTENSIONS = set(['pdf', 'png', 'jpg', 'jpeg'])  # 允许上传的文件类型
+    #     def allowed_file(filename):  # 验证上传的文件名是否符合要求，文件名必须带点并且符合允许上传的文件类型要求，两者都满足则返回 true
+    #         return '.' in filename and \
+    #                filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+    #
+    #     fname = f.filename
+    #     if allowed_file(fname):
+    #         gfs = GridFS(db, collection = 'question')
+    #         fparts = fname.split('.')
+    #         fdesc = fparts[0] # file name
+    #         ftype = fparts[1] # file extend name
+    #
+    #         answer = request.form.get('answer')
+    #         dismissed = (False, True)[request.form.get('dismissed').lower() == 'true']
+    #         category = request.form.get('category')
+    #         if request.method == 'PUT': # delete original picture
+    #             _id = request.form.get('_id')
+    #             obj_id = ObjectId(_id)
+    #             condition = {'uid': uid, '_id': obj_id}
+    #             result = gfs.find_one(condition)  # check uid
+    #             if not result:
+    #                 resp['status'] = 'Failed'
+    #                 resp['message'] = '_id not found'
+    #                 return jsonify(resp)
+    #             else:
+    #                 gfs.delete(obj_id)
+    #
+    #         insertimg = gfs.put(f, content_type = ftype, filename = fdesc,
+    #                             uid = uid, answer = answer, dismissed = dismissed, category = category)
+    #         resp['_id'] = str(insertimg)
+    #         return jsonify(resp)
 
     return jsonify({'status':'Failed', 'message':'file error'})
 

@@ -21,28 +21,18 @@
 
 ```json
 {
-  questions:  // 字典的列表
-    [
-      {
-        _id: '',
-        description: '',
-        answer: '',
-        date: ''
-      }
-    ]
-	pictures: 
-		[
-			{
-				uid
-				data: // 图片
-				answer
-				dismissed
-				category
-				date
-				pic_name：// 不带拓展类型的文件名
-				content_type：// 文件拓展类型
-			}
-		]
+questions:  //字典的列表
+[
+{
+_id:
+description：如果一开始没填就是""字符串
+category
+dismissed
+answer
+date
+url: 如果不是图片就是null
+}
+]
 }
 ```
 
@@ -187,22 +177,16 @@ message: _id not found
 url：`POST /api/quiz`
 
 参数:json
-
+```json
 {
-
-​	"is_corrected":1,  //是否被批改，1表示批改，0未批改
-
-​	"question_arr":[],  //问题的_id数组
-
-​	"answer_arr":["a","b","c"],  //问题的用户回答的数组
-
-​	"correct_arr":[1,0,0],    //用户回答是否正确的数组，1正确，0不正确
-
-​	"date":1576570746,   //上传的时间，timestamp类型
-
-​	"time_used":300    //用户完成测试用时 int类型
-
+    "is_corrected":1,  //是否被批改，1表示批改，0未批改
+    "question_arr":[],  //问题的_id数组
+    "answer_arr":["a","b","c"],  //问题的用户回答的数组
+    "correct_arr":[1,0,0],    //用户回答是否正确的数组，1正确，0不正确
+    "date":1576570746,   //上传的时间，timestamp类型
+    "time_used":300    //用户完成测试用时 int类型
 }
+```
 
 返回：
 
@@ -320,7 +304,7 @@ question_num：测试的错题个数
 category：错题类型
 
 返回：
-
+```json
 {
     "questions": [
         {
@@ -343,3 +327,4 @@ category：错题类型
         }
     ]
 }
+```

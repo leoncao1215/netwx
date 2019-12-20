@@ -1,3 +1,48 @@
+## POST /auth/login
+
+参数(formdata)
+
+| 参数  | 取值  |
+| ----- | ----- |
+| wx_id | `str` |
+
+返回
+
+```json
+{
+  'status': 'Success',
+  'message': 'Login'
+}
+```
+
+或者
+
+```json
+{
+  'status': 'Fail'
+  'message': 'Need wx_id!'
+}
+```
+
+**登陆后访问接口无需再传入其它特殊信息**
+
+
+
+## GET | POST /auth/logout
+
+无参数
+
+返回
+
+```json
+{
+  'status': 'Success',
+  'message': 'Logout'
+}
+```
+
+或 `401`
+
 ## GET /api/wqs
 
 参数(query params)

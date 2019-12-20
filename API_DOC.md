@@ -1,3 +1,52 @@
+## POST /auth/login
+
+根据code进行登录
+
+参数(args)
+
+| 参数 | 取值  |
+| ---- | ----- |
+| code | `str` |
+
+返回
+
+```json
+{
+  'status': 'Success',
+  'message': 'Login'
+}
+```
+
+或者
+
+```json
+{
+  'status': 'Fail'
+  'message': 'FAIL_MESSAGES'
+}
+```
+
+或者`Code 400`
+
+**登陆后访问接口无需再传入其它特殊信息**
+
+
+
+## GET | POST /auth/logout
+
+无参数
+
+返回
+
+```json
+{
+  'status': 'Success',
+  'message': 'Logout'
+}
+```
+
+或 `401`
+
 ## GET /api/wqs
 
 参数(query params)

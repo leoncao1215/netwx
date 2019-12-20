@@ -8,7 +8,7 @@ user = Blueprint('user', __name__)
 
 @user.route('/', methods=['GET'])
 def get_user_info():
-    code = request.form.get('code')
+    code = request.args.get('code')
     appid = current_app.config['APPID']
     secret = current_app.config['SECRET']
     url = 'https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code' \

@@ -10,7 +10,7 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['POST'])
 def login():
-    code = request.args.get('code')
+    code = json.loads(request.data).get('code')
     if not code:
         abort(400)
     appid = current_app.config['APPID']

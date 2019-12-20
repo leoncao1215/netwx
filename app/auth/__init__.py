@@ -13,10 +13,10 @@ def init_app(app):
 @login_manager.user_loader
 def load_user(user_id):
     db = get_db()
-    res = db.user.find_one({'wx_id': user_id})
+    res = db.user.find_one({'openid': user_id})
     if res:
         user = User()
-        user.id = res['wx_id']
+        user.id = res['openid']
         return user
     return None
 

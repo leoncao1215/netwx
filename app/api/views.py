@@ -19,6 +19,7 @@ def get_wrong_questions():
     query = {"uid": uid, "dismissed": dismissed}
     if category:
         query['category'] = category
+    print(uid)
     return jsonify(get_all_question_dict(query))
 
 
@@ -62,7 +63,7 @@ def update_wrong_questions_file():
     f = request.files['file']
     question = {'uid': uid}
     question['description'] = request.form.get('description')
-    question['date'] = timestamp.Timestamp(request.form.get('date'), 1)
+    question['date'] = timestamp.Timestamp(int(request.form.get('date')), 1)
     question['fname'] = f.filename
     question['dismissed'] = (False, True)[request.form.get('dismissed').lower() == 'true']
     question['category'] = request.form.get('category')
@@ -133,7 +134,7 @@ def update_wrong_questions():
         for attr_name in question_attrs:
             attr = request.json.get(attr_name)
             if attr_name == 'date':
-                attr = timestamp.Timestamp(attr, 1)
+                attr = timestamp.Timestamp(int(attr), 1)
             question[attr_name] = attr
 
     if request.method == 'POST':

@@ -2,7 +2,13 @@ from flask_login import UserMixin
 
 
 class User(UserMixin):
-    id = None
+    def __init__(self, user_id=None):
+        if id:
+            self.__user_id = user_id
+
+    @property
+    def id(self):
+        return self.__user_id
 
     def is_authenticated(self):
         return True
@@ -14,5 +20,5 @@ class User(UserMixin):
         return False
 
     def get_id(self):
-        return str(self.id)
+        return str(self.__user_id)
 

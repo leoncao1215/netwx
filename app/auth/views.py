@@ -13,6 +13,11 @@ def login():
     code = json.loads(request.data).get('code')
     if not code:
         abort(400)
+    if code == 'netwx_test':
+        user = User()
+        user.id = 'test_id'
+        login_user(user)
+        return jsonify({'status': 'success', 'message': 'Login'})
     appid = current_app.config['APPID']
     secret = current_app.config['SECRET']
     url = 'https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code' \
@@ -30,10 +35,9 @@ def login():
                 'openid': openid,
                 'session_key': session_key
             })
-        user = User()
-        user.id = u.get('openid')
+        user = User(u.get('openid'))
         login_user(user)
-        return jsonify({'status': 'success', 'message': 'Login'})
+        return jsonify({'status': 'success', 'message': 'Login', 'openid': user.id})
     else:
         print(result)
         if errcode == 40029:

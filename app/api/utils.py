@@ -11,7 +11,8 @@ def get_quiz(raw_quiz):
         'total_num': len(questions),
         'correct_num': len([q['score'] for q in questions if q['score'] == 1]),
         'time_used': raw_quiz['time_used'],
-        'scored': len([q['score'] for q in questions if q['score'] == -1]) == 0
+        'scored': len([q['score'] for q in questions if q['score'] == -1]) == 0,
+        'category': str(raw_quiz['category'])
     }
     from bson.objectid import ObjectId
     for q in questions:

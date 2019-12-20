@@ -74,7 +74,7 @@ def update_wrong_questions_file():
         smms_url = 'https://sm.ms/api/upload'
         file = {'smfile': f}
         data_result=requests.post(smms_url,data=None,files=file)
-        print(data_result.json())
+        # print(data_result.json())
         return data_result.json()
 
     if request.method == 'PUT':
@@ -211,10 +211,12 @@ def upload_quiz_result():
     date = data.get('date')
     date = timestamp.Timestamp(date, 1)
     time_used = data.get('time_used')
+    category = str(data.get('category'))
     quiz = dict()
     quiz['uid'] = uid
     quiz['date'] = date
     quiz['time_used'] = time_used
+    quiz['category'] = category
     quiz['question_list'] = []
     for i in range(len(question_list)):
         quiz['question_list'].append({'qid': question_list[i],

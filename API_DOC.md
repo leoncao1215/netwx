@@ -184,7 +184,8 @@ url：`POST /api/quiz`
     "answer_arr":["a","b","c"],  //问题的用户回答的数组
     "correct_arr":[1,0,0],    //用户回答是否正确的数组，1正确，0不正确
     "date":1576570746,   //上传的时间，timestamp类型
-    "time_used":300    //用户完成测试用时 int类型
+    "time_used":300,    //用户完成测试用时 int类型
+    "category": "数学"
 }
 ```
 
@@ -235,7 +236,8 @@ url: `GET /api/quiz`
             ],
             "scored": true, //是否被批改
             "time_used": 300, //用户完成测试的用时（秒）
-            "total_num": 3 //测试的错题的个数
+            "total_num": 3, //测试的错题的个数
+            "category": "数学"
         }
     ]
 }
@@ -283,7 +285,8 @@ url: 	`GET /api/quiz/<string:id>`
     ],
     "scored": true,
     "time_used": 300,
-    "total_num": 3
+    "total_num": 3,
+    "category": "数学"
 }
 ```
 

@@ -14,8 +14,8 @@ def login():
     if not code:
         abort(400)
     if code == 'netwx_test':
-        user = User()
-        user.id = 'test_id'
+        user = User('test_id')
+        # user.id = 'test_id'
         login_user(user)
         return jsonify({'status': 'success', 'message': 'Login'})
     appid = current_app.config['APPID']

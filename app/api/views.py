@@ -47,7 +47,7 @@ def transfer_question_dict(questions):
                 'date': q['date'].time * 1000,
                 'url': q['url'] if 'url' in q else None
             } for q in questions
-        ] 
+        ]
     }
     return resp
 
@@ -73,7 +73,7 @@ def update_wrong_questions_file():
     def upload_to_smms(f):
         smms_url = 'https://sm.ms/api/upload'
         file = {'smfile': f}
-        data_result=requests.post(smms_url,data=None,files=file)
+        data_result = requests.post(smms_url, data=None, files=file)
         # print(data_result.json())
         return data_result.json()
 
@@ -127,6 +127,7 @@ def update_wrong_questions():
     uid = current_user.get_id()
     db = get_db()
     resp = {}
+
     # upload text question by json
     def load_request_attr(question, request):
         question_attrs = ['description', 'answer', 'dismissed', 'category', 'date']
@@ -148,7 +149,7 @@ def update_wrong_questions():
         # 更新错题
         _id = request.json.get('_id')
         obj_id = ObjectId(_id)
-        condition = {'uid':uid, '_id':obj_id}
+        condition = {'uid': uid, '_id': obj_id}
         ori_question = db.question.find_one(condition)
         load_request_attr(ori_question, request)
         result = db.question.update_one(condition, {'$set': ori_question})
@@ -220,9 +221,9 @@ def upload_quiz_result():
     quiz['question_list'] = []
     for i in range(len(question_list)):
         quiz['question_list'].append({'qid': question_list[i],
-                                    'answer': answer_list[i],
-                                    'score': correct_list[i] if is_corrected else -1
-                                    })
+                                      'answer': answer_list[i],
+                                      'score': correct_list[i] if is_corrected else -1
+                                      })
     result = db.quiz.insert_one(quiz)
     resp = dict()
     resp['_id'] = str(result.inserted_id)

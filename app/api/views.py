@@ -69,11 +69,13 @@ def update_wrong_questions_file():
     resp = {}
 
     f = request.files['file']
+    import uuid
+    hashname = str(uuid.uuid4()) + os.path.splitext(f.filename)[-1]
     question = {'uid': uid}
     question['description'] = request.form.get('description')
     question['date'] = timestamp.Timestamp(int(request.form.get('date')) // 1000, 1)
     question['fname'] = f.filename
-    question['hashname'] = hash(uid + f.filename)
+    question['hashname'] = hashname
     question['dismissed'] = boolean(request.form.get('dismissed')) is True
     question['category'] = request.form.get('category')
     question['answer'] = request.form.get('answer')

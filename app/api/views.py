@@ -72,6 +72,12 @@ def update_wrong_questions_file():
     question['category'] = request.form.get('category')
     question['answer'] = request.form.get('answer')
 
+    # import os
+    # from werkzeug.utils import secure_filename
+    # from .utils import get_upload_path
+    # upload_path = os.path.join(get_upload_path(), 'static/uploads', secure_filename(f.filename))
+    # f.save(upload_path)
+    # return '123'
     import requests
 
     def upload_to_smms(f):
@@ -256,3 +262,10 @@ def generate_quiz(question_num: int, category: str):
     questions = random.sample(questions, min(len(questions), question_num))
     resp = transfer_question_dict(questions)
     return jsonify(resp)
+
+
+@api.route('/uploads/<string:filename>')
+def uploaded_file(filename: str):
+    from flask import send_from_directory
+    from .utils import get_upload_path
+    return send_from_directory(get_upload_path(), filename)

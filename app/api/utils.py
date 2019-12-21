@@ -34,3 +34,9 @@ def boolean(v: str):
         return True
     return False
 
+
+def get_upload_path():
+    import os
+    import sys
+    return os.path.join(sys.path[0], 'static/uploads')
+

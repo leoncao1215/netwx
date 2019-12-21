@@ -50,7 +50,7 @@ def transfer_question_dict(questions):
                 'answer': q['answer'],
                 'date': q['date'].time * 1000,
                 # 'url': q['url'] if 'url' in q else None,
-                'url': q['hashname'] if 'hashname' in q else None
+                'url': q['url'] if 'url' in q else None
             } for q in questions
         ]
     }
@@ -79,6 +79,7 @@ def update_wrong_questions_file():
     question['dismissed'] = boolean(request.form.get('dismissed')) is True
     question['category'] = request.form.get('category')
     question['answer'] = request.form.get('answer')
+    question['url'] = 'https://netwx.c-leon.top/api/uploads/' + hashname
 
     if request.method == 'PUT':
         _id = request.form.get('_id')

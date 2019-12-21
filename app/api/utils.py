@@ -6,7 +6,7 @@ def get_quiz(raw_quiz):
     questions = raw_quiz['question_list']
     quiz = {
         '_id': str(raw_quiz['_id']),
-        'date': raw_quiz['date'].time,
+        'date': raw_quiz['date'].time * 1000,
         'question_list': [],
         'total_num': len(questions),
         'correct_num': len([q['score'] for q in questions if q['score'] == 1]),
@@ -16,10 +16,13 @@ def get_quiz(raw_quiz):
     }
     from bson.objectid import ObjectId
     for q in questions:
+        ques = db.question.find_one({'_id': ObjectId(q['qid'])})
         tmp_qes = {
             'qid': q['qid'],
-            'description': db.question.find_one({'_id': ObjectId(q['qid'])}).get('description'),
-            'answer': q['answer']
+            'description': ques['description'],
+            'answer': q['answer'],
+            'date': ques['date'].time * 1000,
+            'url': ques['url'] if 'url' in ques else None
         }
         if q['score'] == 1:
             tmp_qes['is_correct'] = True

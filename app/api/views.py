@@ -65,7 +65,7 @@ def update_wrong_questions_file():
     question['description'] = request.form.get('description')
     question['date'] = timestamp.Timestamp(int(request.form.get('date')), 1)
     question['fname'] = f.filename
-    question['dismissed'] = (False, True)[request.form.get('dismissed').lower() == 'true']
+    question['dismissed'] = bool(request.form.get('dismissed')) == True
     question['category'] = request.form.get('category')
     question['answer'] = request.form.get('answer')
 

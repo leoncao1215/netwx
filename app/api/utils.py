@@ -28,3 +28,9 @@ def get_quiz(raw_quiz):
         quiz['question_list'].append(tmp_qes)
     return quiz
 
+
+def boolean(v: str):
+    if v.lower() == 'true':
+        return True
+    return False
+

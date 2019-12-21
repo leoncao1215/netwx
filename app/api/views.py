@@ -4,6 +4,7 @@ from bson.objectid import ObjectId
 from app.db import get_db
 from bson import timestamp
 import random
+from .utils import boolean
 
 api = Blueprint('api', __name__)
 
@@ -12,10 +13,13 @@ api = Blueprint('api', __name__)
 @api.route('/wqs', methods=['GET'])
 @login_required
 def get_wrong_questions():
-    dismissed = request.args.get('dismissed', default=False, type=bool)
+    dismissed = request.args.get('dismissed', default=None, type=boolean)
     category = request.args.get('category', default=None, type=str)
+    print(dismissed)
     uid = current_user.get_id()
-    query = {"uid": uid, "dismissed": dismissed}
+    query = {"uid": uid}
+    if dismissed is not None:
+        query['dismissed'] = dismissed
     if category:
         query['category'] = category
     print(uid)
@@ -64,7 +68,7 @@ def update_wrong_questions_file():
     question['description'] = request.form.get('description')
     question['date'] = timestamp.Timestamp(int(request.form.get('date')) // 1000, 1)
     question['fname'] = f.filename
-    question['dismissed'] = bool(request.form.get('dismissed')) == True
+    question['dismissed'] = boolean(request.form.get('dismissed')) is True
     question['category'] = request.form.get('category')
     question['answer'] = request.form.get('answer')
 

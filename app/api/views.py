@@ -49,7 +49,8 @@ def transfer_question_dict(questions):
                 'dismissed': q['dismissed'],
                 'answer': q['answer'],
                 'date': q['date'].time * 1000,
-                'url': q['url'] if 'url' in q else None
+                # 'url': q['url'] if 'url' in q else None,
+                'url': q['hashname'] if 'hashname' in q else None
             } for q in questions
         ]
     }
@@ -59,6 +60,10 @@ def transfer_question_dict(questions):
 @api.route('/wqs_file', methods=['POST', 'PUT'])
 @login_required
 def update_wrong_questions_file():
+    import os
+    from werkzeug.utils import secure_filename
+    from .utils import get_upload_path
+
     uid = current_user.get_id()
     db = get_db()
     resp = {}
@@ -68,24 +73,10 @@ def update_wrong_questions_file():
     question['description'] = request.form.get('description')
     question['date'] = timestamp.Timestamp(int(request.form.get('date')) // 1000, 1)
     question['fname'] = f.filename
+    question['hashname'] = hash(uid + f.filename)
     question['dismissed'] = boolean(request.form.get('dismissed')) is True
     question['category'] = request.form.get('category')
     question['answer'] = request.form.get('answer')
-
-    # import os
-    # from werkzeug.utils import secure_filename
-    # from .utils import get_upload_path
-    # upload_path = os.path.join(get_upload_path(), 'static/uploads', secure_filename(f.filename))
-    # f.save(upload_path)
-    # return '123'
-    import requests
-
-    def upload_to_smms(f):
-        smms_url = 'https://sm.ms/api/upload'
-        file = {'smfile': f}
-        data_result = requests.post(smms_url, data=None, files=file)
-        # print(data_result.json())
-        return data_result.json()
 
     if request.method == 'PUT':
         _id = request.form.get('_id')
@@ -96,39 +87,80 @@ def update_wrong_questions_file():
             resp['message'] = '_id not found'
             return jsonify(resp)
         else:
-            delete_url = ori_question['delete']
-            requests.get(delete_url)  # delete
-
-    # upload picture
-    data_result = upload_to_smms(f)
-    smms_result = data_result['success']
-    # smms_code = data_result['code']
-    smms_message = data_result['message']
-
-    resp['success'] = smms_result
-    resp['message'] = smms_message
-
-    if smms_result is True:
-        data = data_result['data']
-        # store data dictionary to MongoDB
-        # data_keys = ['width', 'height', 'size', 'path', 'hash', 'url', 'delete', 'page', 'RequestId']  # 'filename','storename','file_id',
-        del data['filename'], data['storename'], data['file_id']
-        question.update(data)
-        if request.method == 'PUT':
-            ori_question.update(data)
+            try:
+                os.remove(os.path.join(get_upload_path(), str(ori_question['hashname']))) #secure_filename(name)
+            except FileNotFoundError:
+                resp['success'] = False
+                resp['message'] = 'original file not found.'
+                return jsonify(resp)
             ori_question.update(question)
             update_result = db.question.update_one(condition, {'$set': ori_question})
+            upload_path = os.path.join(get_upload_path(), str(question['hashname']))  # secure_filename(name)
+            f.save(upload_path)
             # print(result.raw_result)
+            resp['success'] = True
             resp['matched_count'] = update_result.matched_count
             resp['modified_count'] = update_result.modified_count
-        elif request.method == 'POST':
-            result = db.question.insert_one(question)
-            resp['_id'] = str(result.inserted_id)
-        return jsonify(resp)
-    else:
-        # smms_images = data_result['images']
-        # smms_request_id = data_result['RequestId']
-        return jsonify(resp)
+            return jsonify(resp)
+
+    upload_path = os.path.join(get_upload_path(), str(question['hashname'])) #secure_filename(name)
+    f.save(upload_path)
+    result = db.question.insert_one(question)
+    resp['_id'] = str(result.inserted_id)
+    resp['success'] = True
+    resp['message'] = 'upload success'
+    return jsonify(resp)
+
+    # import requests
+    # def upload_to_smms(f):
+    #     smms_url = 'https://sm.ms/api/upload'
+    #     file = {'smfile': f}
+    #     data_result = requests.post(smms_url, data=None, files=file)
+    #     # print(data_result.json())
+    #     return data_result.json()
+
+    # if request.method == 'PUT':
+    #     _id = request.form.get('_id')
+    #     condition = {'uid': uid, '_id': ObjectId(_id)}
+    #     ori_question = db.question.find_one(condition)
+    #     if not ori_question:
+    #         resp['success'] = False
+    #         resp['message'] = '_id not found'
+    #         return jsonify(resp)
+    #     else:
+    #         delete_url = ori_question['delete']
+    #         requests.get(delete_url)  # delete
+
+    # upload picture
+    # data_result = upload_to_smms(f)
+    # smms_result = data_result['success']
+    # # smms_code = data_result['code']
+    # smms_message = data_result['message']
+    #
+    # resp['success'] = smms_result
+    # resp['message'] = smms_message
+
+    # if smms_result is True:
+    #     data = data_result['data']
+    #     # store data dictionary to MongoDB
+    #     # data_keys = ['width', 'height', 'size', 'path', 'hash', 'url', 'delete', 'page', 'RequestId']  # 'filename','storename','file_id',
+    #     del data['filename'], data['storename'], data['file_id']
+    #     question.update(data)
+    #     if request.method == 'PUT':
+    #         ori_question.update(data)
+    #         ori_question.update(question)
+    #         update_result = db.question.update_one(condition, {'$set': ori_question})
+    #         # print(result.raw_result)
+    #         resp['matched_count'] = update_result.matched_count
+    #         resp['modified_count'] = update_result.modified_count
+    #     elif request.method == 'POST':
+    #         result = db.question.insert_one(question)
+    #         resp['_id'] = str(result.inserted_id)
+    #     return jsonify(resp)
+    # else:
+    #     # smms_images = data_result['images']
+    #     # smms_request_id = data_result['RequestId']
+    #     return jsonify(resp)
 
 
 @api.route('/wqs', methods=['POST', 'PUT'])

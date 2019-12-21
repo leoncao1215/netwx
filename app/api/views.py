@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify, abort
 from flask_login import login_required, current_user
 from bson.objectid import ObjectId
 from app.db import get_db
-from gridfs import GridFS
 from bson import timestamp
 import random
 
@@ -45,7 +44,7 @@ def transfer_question_dict(questions):
                 'category': q['category'],
                 'dismissed': q['dismissed'],
                 'answer': q['answer'],
-                'date': q['date'].time,
+                'date': q['date'].time * 1000,
                 'url': q['url'] if 'url' in q else None
             } for q in questions
         ] 
@@ -63,7 +62,7 @@ def update_wrong_questions_file():
     f = request.files['file']
     question = {'uid': uid}
     question['description'] = request.form.get('description')
-    question['date'] = timestamp.Timestamp(int(request.form.get('date')), 1)
+    question['date'] = timestamp.Timestamp(int(request.form.get('date')) // 1000, 1)
     question['fname'] = f.filename
     question['dismissed'] = bool(request.form.get('dismissed')) == True
     question['category'] = request.form.get('category')
@@ -134,7 +133,7 @@ def update_wrong_questions():
         for attr_name in question_attrs:
             attr = request.json.get(attr_name)
             if attr_name == 'date':
-                attr = timestamp.Timestamp(int(attr), 1)
+                attr = timestamp.Timestamp(int(attr) // 1000, 1)
             question[attr_name] = attr
 
     if request.method == 'POST':
@@ -210,7 +209,7 @@ def upload_quiz_result():
     correct_list = data.get('correct_arr')
     from bson import timestamp
     date = data.get('date')
-    date = timestamp.Timestamp(date, 1)
+    date = timestamp.Timestamp(date // 1000, 1)
     time_used = data.get('time_used')
     category = str(data.get('category'))
     quiz = dict()

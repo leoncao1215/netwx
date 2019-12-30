@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from bson.objectid import ObjectId
 from app.db import get_db
 from bson import timestamp
+import pymongo
 import random
 from .utils import boolean
 
@@ -15,14 +16,12 @@ api = Blueprint('api', __name__)
 def get_wrong_questions():
     dismissed = request.args.get('dismissed', default=None, type=boolean)
     category = request.args.get('category', default=None, type=str)
-    print(dismissed)
     uid = current_user.get_id()
     query = {"uid": uid}
     if dismissed is not None:
         query['dismissed'] = dismissed
     if category:
         query['category'] = category
-    print(uid)
     return jsonify(get_all_question_dict(query))
 
 
@@ -33,7 +32,7 @@ def get_all_question_dict(query):
 
 def get_all_question(query):
     db = get_db()
-    questions = db.question.find(query)
+    questions = db.question.find(query).sort('date', pymongo.DESCENDING)
     # gfs = GridFS(db, collection='question')
     # pic_results = gfs.find(query)
     return questions
@@ -234,7 +233,7 @@ def get_categories():
 def get_all_quizzes():
     uid = current_user.get_id()
     db = get_db()
-    quizzes = db.quiz.find({'uid': uid})
+    quizzes = db.quiz.find({'uid': uid}).sort('date', pymongo.DESCENDING)
     resp = {'quizzes': []}
 
     for quiz in quizzes:

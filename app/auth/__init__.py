@@ -34,7 +34,7 @@ def load_user_from_request(request):
 
     # next, try to login using Basic Auth
     api_key = request.headers.get('Authorization')
-    print(api_key)
+    # print(api_key)
     if api_key:
         db = get_db()
         # api_key = api_key.replace('Basic ', '', 1)

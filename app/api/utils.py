@@ -20,7 +20,8 @@ def get_quiz(raw_quiz):
         tmp_qes = {
             'qid': q['qid'],
             'description': ques['description'],
-            'answer': q['answer'],
+            'answer': ques['answer'],
+            'myAnswer': q['answer'],
             'date': ques['date'].time * 1000,
             'url': ques['url'] if 'url' in ques else None
         }

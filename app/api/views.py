@@ -221,11 +221,11 @@ def delete_wrong_question(wq_id: str):
 def get_categories():
     uid = current_user.get_id()
     db = get_db()
-    res = db.question.distinct('category')
-    # res = db.question.find({'uid': uid})
-    # categories = set([_['category'] for _ in res])
-    # resp = {'categories': list(categories)}
-    return jsonify(res)
+    # res = db.question.distinct('category')
+    res = db.question.find({'uid': uid})
+    categories = set([_['category'] for _ in res])
+    resp = list(categories)
+    return jsonify(resp)
 
 
 @api.route('/quiz', methods=['GET'])
